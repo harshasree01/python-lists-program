@@ -1,0 +1,169 @@
+# --------------------------------------------
+# MINI PROJECT: ATM MANAGEMENT SYSTEM
+# Beginner-friendly Python OOP Project
+# --------------------------------------------
+
+from abc import ABC, abstractmethod
+
+# --------------------------------------------
+# PART 1: Abstract Class
+# --------------------------------------------
+class BankAccount(ABC):
+    @abstractmethod
+    def transaction(self):
+        """Abstract method to enforce transaction behavior in child classes"""
+        pass
+
+
+# --------------------------------------------
+# PART 2: Base Class (Encapsulation)
+# --------------------------------------------
+class Account(BankAccount):
+    def __init__(self, name, acc_number, balance, pin):
+        # Public attribute
+        self.name = name
+        # Protected attribute
+        self._acc_number = acc_number
+        # Private attributes
+        self.__balance = balance
+        self.__pin = pin
+        # Transaction history
+        self.transactions = []
+
+    # PIN verification
+    def verify_pin(self, entered_pin):
+        return self.__pin == entered_pin
+
+    # Getter for balance
+    def get_balance(self):
+        return self.__balance
+
+    # Setter for balance
+    def set_balance(self, amount):
+        self.__balance = amount
+
+    # Display account details
+    def account_details(self):
+        print("\n--- Account Details ---")
+        print(f"Name: {self.name}")
+        print(f"Account Number: {self._acc_number}")
+        print(f"Balance: ₹{self.__balance}")
+
+    def transaction(self):
+        print("Account transaction")
+
+
+# --------------------------------------------
+# PART 3: Child Class (ATM)
+# --------------------------------------------
+class ATM(Account):
+    bank_name = "ABC Bank"
+    DAILY_LIMIT = 5000  # Withdrawal limit per day
+
+    def __init__(self, name, acc_number, balance, pin):
+        super().__init__(name, acc_number, balance, pin)
+        self.withdrawn_today = 0
+
+    def check_balance(self):
+        print(f"Current Balance: ₹{self.get_balance()}")
+
+    def deposit(self, amount):
+        if amount > 0:
+            self.set_balance(self.get_balance() + amount)
+            self.transactions.append(f"Deposited ₹{amount}")
+            print("✅ Deposit successful!")
+        else:
+            print("❌ Invalid amount!")
+
+    def withdraw(self, amount):
+        if amount <= 0:
+            print("❌ Invalid amount!")
+            return
+
+        if self.withdrawn_today + amount > ATM.DAILY_LIMIT:
+            print("⚠️ Daily withdrawal limit exceeded!")
+            return
+
+        if amount <= self.get_balance():
+            self.set_balance(self.get_balance() - amount)
+            self.withdrawn_today += amount
+            self.transactions.append(f"Withdrawn ₹{amount}")
+            print("✅ Withdrawal successful!")
+        else:
+            print("❌ Insufficient balance!")
+
+    def show_transactions(self):
+        print("\n--- Transaction History ---")
+        if not self.transactions:
+            print("No transactions yet.")
+        else:
+            for t in self.transactions:
+                print("-", t)
+
+    @classmethod
+    def display_bank_name(cls):
+        print(f"\n🏦 Welcome to {cls.bank_name} ATM")
+
+    @staticmethod
+    def validate_amount(amount):
+        return amount > 0
+
+    def transaction(self):
+        print("ATM transaction processing...")
+
+
+# --------------------------------------------
+# PART 4: Menu Driven Program
+# --------------------------------------------
+def main():
+    # Create a sample ATM user
+    atm_user = ATM("Rahul", 12345, 1000, 1234)
+
+    ATM.display_bank_name()
+
+    # PIN verification (3 attempts)
+    for _ in range(3):
+        pin = int(input("Enter your PIN: "))
+        if atm_user.verify_pin(pin):
+            print("✅ PIN verified successfully!")
+            break
+    else:
+        print("❌ Too many wrong attempts. Card blocked!")
+        exit()
+
+    # Menu loop
+    while True:
+        print("\nATM MENU")
+        print("1. Check Balance")
+        print("2. Deposit")
+        print("3. Withdraw")
+        print("4. Transaction History")
+        print("5. Account Details")
+        print("6. Exit")
+
+        choice = input("Enter choice: ")
+
+        if choice == "1":
+            atm_user.check_balance()
+        elif choice == "2":
+            amt = int(input("Enter deposit amount: "))
+            atm_user.deposit(amt)
+        elif choice == "3":
+            amt = int(input("Enter withdrawal amount: "))
+            atm_user.withdraw(amt)
+        elif choice == "4":
+            atm_user.show_transactions()
+        elif choice == "5":
+            atm_user.account_details()
+        elif choice == "6":
+            print("🙏 Thank you for using ABC Bank ATM!")
+            break
+        else:
+            print("❌ Invalid choice! Please try again.")
+
+
+# --------------------------------------------
+# PROGRAM EXECUTION
+# --------------------------------------------
+if __name__ == "__main__":
+    main()
